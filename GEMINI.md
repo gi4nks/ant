@@ -1,6 +1,6 @@
 # Ant - AI Context & Guidelines
 
-Ant is a simple, local-first authentication library for Next.js. It focuses on security-by-default, simplicity, and zero-config for development while enforcing strict security for production.
+Ant is a simple, local-first authentication library for Next.js. It focuses on security-by-default, simplicity, and zero-config for development while enforcing strict security for production. It supports both **Single-User** (env-based) and **Multi-User** (provider-based) modes.
 
 ## Tech Stack
 - **Language**: TypeScript

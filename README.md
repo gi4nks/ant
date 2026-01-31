@@ -99,6 +99,47 @@ const { getSession } = createAuth<MySession>();
 const session = await getSession(); // Typed as AntSession<MySession>
 ```
 
+### Multi-User Support (Credentials Provider)
+
+Ant supports multiple users via a custom `provider` function. This is ideal for external projects that need to verify credentials against a database or an external API.
+
+#### Example: Integration with a Database (e.g., Prisma or Drizzle)
+
+In your external project, you can define the auth configuration like this:
+
+```typescript
+// lib/auth.ts
+import { createAuth } from '@gi4nks/ant';
+import { db } from '@/lib/db'; // Your database client
+
+export const auth = createAuth({
+  secret: process.env.ANT_JWT_SECRET,
+  
+  // Custom provider to fetch users dynamically
+  provider: async (username: string) => {
+    // 1. Fetch user from your database
+    const user = await db.user.findUnique({ 
+      where: { email: username } 
+    });
+    
+    if (!user) return null;
+    
+    // 2. Return the AntUser object. 
+    // Ant will handle the password verification using the hash.
+    return {
+      id: user.id,
+      username: user.email,
+      passwordHash: user.password_hash, // Must be a valid bcrypt hash
+      // Any additional fields will be included in the session token
+      role: user.role,
+      name: user.name,
+    };
+  }
+});
+```
+
+When using a provider, the `ANT_AUTH_USER` and `ANT_AUTH_PASSWORD` environment variables are no longer required.
+
 ## Integration Examples
 
 ### Conan (Internal Tool)
