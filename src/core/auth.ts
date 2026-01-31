@@ -42,10 +42,20 @@ export function checkCredentials(
   user?: string, 
   password?: string
 ): boolean {
-  if (!user || !password) return false;
+  if (!user || !password) {
+    console.debug('[AntAuth] Missing credentials');
+    return false;
+  }
   
-  const userMatch = user === config.user; // Simple equality for username is fine, but we can use safeCompare if paranoid
+  const userMatch = user === config.user;
+  if (!userMatch) {
+    console.debug(`[AntAuth] User mismatch: ${user}`);
+  }
+
   const passwordMatch = verifyPassword(password, config.passwordHash, config.password);
+  if (!passwordMatch) {
+    console.debug('[AntAuth] Password mismatch');
+  }
   
   return userMatch && passwordMatch;
 }

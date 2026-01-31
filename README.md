@@ -31,6 +31,33 @@ Note: The application will throw an error at startup if environment variables ar
 
 ## Usage
 
+### UI Components
+
+Ant provides a ready-to-use login form for React/Next.js:
+
+```tsx
+import { auth, LoginForm } from '@gi4nks/ant';
+
+export default function LoginPage({ searchParams }: { searchParams: { callbackUrl?: string } }) {
+  async function handleLogin(formData: FormData) {
+    'use server';
+    try {
+      await auth.login(formData);
+      // Logic to redirect using searchParams.callbackUrl
+    } catch (e: any) {
+      return { error: e.message };
+    }
+  }
+
+  return (
+    <LoginForm 
+      action={handleLogin} 
+      callbackUrl={searchParams.callbackUrl} 
+    />
+  );
+}
+```
+
 ### Functional API (Recommended)
 
 ```typescript
