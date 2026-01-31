@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/gi4nks/ant/compare/v1.2.0...v1.2.1) (2026-01-31)
+
+
+### Bug Fixes
+
+* lazy initialize configuration to avoid crashes on import during build ([2e4501d](https://github.com/gi4nks/ant/commit/2e4501db73d744e9201feffc79b7e4b2c76c0849))
+
 # [1.2.0](https://github.com/gi4nks/ant/compare/v1.1.3...v1.2.0) (2026-01-31)
 
 
