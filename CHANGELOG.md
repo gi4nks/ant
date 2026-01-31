@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/gi4nks/ant/compare/v1.1.0...v1.1.1) (2026-01-31)
+
+
+### Bug Fixes
+
+* added verify credentials ([64c4084](https://github.com/gi4nks/ant/commit/64c4084745dedde589f3b96e71c11f1f7190d321))
+
 # [1.1.0](https://github.com/gi4nks/ant/compare/v1.0.0...v1.1.0) (2026-01-31)
 
 
