@@ -10,6 +10,7 @@ export * from './next/components';
 
 import { AntAuthConfig, AntAuthResolvedConfig, AntSession } from './core/types';
 import { resolveConfig, checkCredentials } from './core/auth';
+import { verifyPassword } from './core/password';
 import { signToken, verifyToken } from './core/token';
 import { setSessionCookie, deleteSessionCookie, getSessionCookie } from './next/cookies';
 import { createAntMiddleware } from './next/middleware';
@@ -38,14 +39,30 @@ export class AntAuth {
       }
     }
 
-    const isValid = checkCredentials(this.config, user, password);
+    let isValid = false;
+    let payload: any = { user };
+
+    if (this.config.provider) {
+      const antUser = await this.config.provider(user);
+      if (antUser) {
+        isValid = verifyPassword(password, antUser.passwordHash);
+        if (isValid) {
+          // Exclude passwordHash from token payload
+          const { passwordHash, ...rest } = antUser;
+          payload = rest;
+        }
+      }
+    } else {
+      isValid = checkCredentials(this.config, user, password);
+    }
+
     if (!isValid) {
       throw new Error('Invalid credentials');
     }
 
     if (identifier) resetRateLimit(identifier);
 
-    const token = await signToken({ user }, this.config.secretBytes, this.config.tokenTTL);
+    const token = await signToken(payload, this.config.secretBytes, this.config.tokenTTL);
     await setSessionCookie(this.config, token);
     return token;
   }

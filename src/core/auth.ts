@@ -3,38 +3,44 @@ import { AntAuthConfig, AntAuthResolvedConfig } from './types';
 import { verifyPassword } from './password';
 
 export function resolveConfig(config: AntAuthConfig = {}): AntAuthResolvedConfig {
-  const env = (!config.secret || !config.user || (!config.password && !config.passwordHash)) 
-    ? validateEnv() 
-    : null;
+  const isMultiUser = !!config.provider;
+  
+  // If provider is present, we only strictly need the secret.
+  // Otherwise, we need user + password/hash.
+  const needsEnvValidation = isMultiUser 
+    ? !config.secret 
+    : (!config.secret || !config.user || (!config.password && !config.passwordHash));
 
-  const resolved: Required<Omit<AntAuthConfig, 'rateLimit'>> = {
+  const env = needsEnvValidation ? validateEnv() : null;
+
+  const resolved: AntAuthResolvedConfig = {
     secret: config.secret || env?.ANT_JWT_SECRET!,
-    user: config.user || env?.ANT_AUTH_USER!,
+    // In multi-user mode, these defaults are placeholders if not provided
+    user: config.user || env?.ANT_AUTH_USER || '', 
     password: config.password || env?.ANT_AUTH_PASSWORD || '',
     passwordHash: config.passwordHash || env?.ANT_AUTH_PASSWORD_HASH || '',
     sessionCookieName: config.sessionCookieName || 'session',
     loginPath: config.loginPath || '/login',
     successRedirect: config.successRedirect || '/',
     tokenTTL: config.tokenTTL || env?.ANT_TOKEN_TTL || (process.env.NODE_ENV === 'production' ? '1d' : '7d'),
+    rateLimit: {
+      maxAttempts: config.rateLimit?.maxAttempts || 5,
+      windowMs: config.rateLimit?.windowMs || 15 * 60 * 1000, // 15 minutes
+    },
+    secretBytes: new Uint8Array(0), // Placeholder, set below
+    provider: config.provider,
   };
 
-  const rateLimit: Required<NonNullable<AntAuthConfig['rateLimit']>> = {
-    maxAttempts: config.rateLimit?.maxAttempts || 5,
-    windowMs: config.rateLimit?.windowMs || 15 * 60 * 1000, // 15 minutes
-  };
-
-  if (process.env.NODE_ENV === 'production' && !resolved.passwordHash) {
+  if (!isMultiUser && process.env.NODE_ENV === 'production' && !resolved.passwordHash) {
     console.warn(
       '[AntAuth] WARNING: Using plaintext password in production. ' +
       'It is strongly recommended to use ANT_AUTH_PASSWORD_HASH.'
     );
   }
 
-  return {
-    ...resolved,
-    rateLimit,
-    secretBytes: new TextEncoder().encode(resolved.secret),
-  };
+  resolved.secretBytes = new TextEncoder().encode(resolved.secret);
+
+  return resolved;
 }
 
 export function checkCredentials(
