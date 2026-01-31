@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/gi4nks/ant/compare/v1.1.2...v1.1.3) (2026-01-31)
+
+
+### Bug Fixes
+
+* relax production password hash enforcement to warning and update docs ([1e9fadd](https://github.com/gi4nks/ant/commit/1e9fadd56734cb4fbc6e44112df87b9ce60d1f03))
+
 ## [1.1.2](https://github.com/gi4nks/ant/compare/v1.1.1...v1.1.2) (2026-01-31)
 
 
