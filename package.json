@@ -2,19 +2,16 @@
   "name": "@gi4nks/ant",
   "version": "1.0.0",
   "description": "Simple local-first authentication library for Next.js",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
@@ -41,7 +38,7 @@
     ]
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts", "prepare": "npm run build",
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
     "lint": "eslint src",
     "test": "vitest run"

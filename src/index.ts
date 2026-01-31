@@ -50,6 +50,10 @@ export class AntAuth {
     return token;
   }
 
+  verifyCredentials(user?: string, password?: string): boolean { 
+    return checkCredentials(this.config, user, password); 
+  } 
+
   async logout() {
     await deleteSessionCookie(this.config);
   }
