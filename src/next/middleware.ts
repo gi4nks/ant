@@ -51,5 +51,11 @@ function handleUnauthorized(request: NextRequest, config: AntAuthResolvedConfig)
   if (path.startsWith('/api/')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  return NextResponse.redirect(new URL(config.loginPath, request.url));
+
+  const loginUrl = new URL(config.loginPath, request.url);
+  if (path !== '/' && path !== config.loginPath) {
+    loginUrl.searchParams.set('callbackUrl', path);
+  }
+  
+  return NextResponse.redirect(loginUrl);
 }

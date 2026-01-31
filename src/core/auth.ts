@@ -7,14 +7,20 @@ export function resolveConfig(config: AntAuthConfig = {}): AntAuthResolvedConfig
     ? validateEnv() 
     : null;
 
-  const resolved: Required<AntAuthConfig> = {
+  const resolved: Required<Omit<AntAuthConfig, 'rateLimit'>> = {
     secret: config.secret || env?.ANT_JWT_SECRET!,
     user: config.user || env?.ANT_AUTH_USER!,
     password: config.password || env?.ANT_AUTH_PASSWORD || '',
     passwordHash: config.passwordHash || env?.ANT_AUTH_PASSWORD_HASH || '',
     sessionCookieName: config.sessionCookieName || 'session',
     loginPath: config.loginPath || '/login',
+    successRedirect: config.successRedirect || '/',
     tokenTTL: config.tokenTTL || env?.ANT_TOKEN_TTL || (process.env.NODE_ENV === 'production' ? '1d' : '7d'),
+  };
+
+  const rateLimit: Required<NonNullable<AntAuthConfig['rateLimit']>> = {
+    maxAttempts: config.rateLimit?.maxAttempts || 5,
+    windowMs: config.rateLimit?.windowMs || 15 * 60 * 1000, // 15 minutes
   };
 
   if (process.env.NODE_ENV === 'production' && !resolved.passwordHash) {
@@ -26,6 +32,7 @@ export function resolveConfig(config: AntAuthConfig = {}): AntAuthResolvedConfig
 
   return {
     ...resolved,
+    rateLimit,
     secretBytes: new TextEncoder().encode(resolved.secret),
   };
 }
