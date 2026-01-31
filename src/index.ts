@@ -21,10 +21,18 @@ import { NextRequest } from 'next/server';
  * Class-based API for AntAuth
  */
 export class AntAuth {
-  private config: AntAuthResolvedConfig;
+  private _config?: AntAuthResolvedConfig;
+  private _rawConfig?: AntAuthConfig;
 
   constructor(config?: AntAuthConfig) {
-    this.config = resolveConfig(config);
+    this._rawConfig = config;
+  }
+
+  private get config(): AntAuthResolvedConfig {
+    if (!this._config) {
+      this._config = resolveConfig(this._rawConfig);
+    }
+    return this._config;
   }
 
   async login(formData: FormData, ip?: string) {
