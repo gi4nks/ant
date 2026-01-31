@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/gi4nks/ant/compare/v1.1.1...v1.1.2) (2026-01-31)
+
+
+### Bug Fixes
+
+* replace node:crypto with custom timingSafeEqual for edge compatibility ([5c4da0b](https://github.com/gi4nks/ant/commit/5c4da0be38a45cc3f39862d080a6aa59998ef164))
+
 ## [1.1.1](https://github.com/gi4nks/ant/compare/v1.1.0...v1.1.1) (2026-01-31)
 
 
