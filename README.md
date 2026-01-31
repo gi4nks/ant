@@ -9,6 +9,7 @@ Ant is designed for **local-first** applications, internal tools, or small-scale
 - **Intended Use**: Internal dashboards, local development tools, small private sites.
 - **NOT Intended For**: High-traffic public internet-facing applications, high-value financial systems, or applications requiring complex RBAC.
 - **Guarantees**: 
+  - **Edge Runtime Compatible**: Works seamlessly in Next.js Middleware and Edge API Routes.
   - Timing-safe credential comparison.
   - Robust CSRF protection for state-changing methods.
   - Secure-by-default cookies (HttpOnly, Secure, SameSite=Strict).
@@ -21,13 +22,13 @@ Configure via environment variables or constructor (Required):
 
 - `ANT_JWT_SECRET`: Secret for JWT signing (min 32 chars).
 - `ANT_AUTH_USER`: Authorized username.
-- `ANT_AUTH_PASSWORD`: Authorized password (min 8 chars). Only allowed in development.
-- `ANT_AUTH_PASSWORD_HASH`: Bcrypt hash of the password. **Required in production**. 
+- `ANT_AUTH_PASSWORD`: Authorized password (min 8 chars).
+- `ANT_AUTH_PASSWORD_HASH`: Bcrypt hash of the password. **Strongly Recommended in production**. 
 - `ANT_TOKEN_TTL`: Optional. Token expiration time (e.g., `1d`, `7d`). Default: `1d` in production, `7d` in development.
 
-Note: In **development**, you should comment out or omit `ANT_AUTH_PASSWORD_HASH` to use the plaintext `ANT_AUTH_PASSWORD`. In production, `ANT_AUTH_PASSWORD` is ignored for security, and a valid hash is mandatory.
+Note: In **production**, it is strongly recommended to use `ANT_AUTH_PASSWORD_HASH`. If only `ANT_AUTH_PASSWORD` is provided, the application will **warn** but continue to function.
 
-Note: The application will throw an error at startup if environment variables are missing or invalid.
+Note: The application will throw an error at startup if required environment variables (like Secret or User) are missing.
 
 ## Usage
 
@@ -111,7 +112,7 @@ Migrate from custom JWT logic to Ant to ensure timing-safe comparisons and robus
 1. **CSRF Protection**: Automatic for all `POST`, `PUT`, `DELETE`, `PATCH` methods in the middleware.
 2. **Timing-Safe**: All credential checks use constant-time comparison.
 3. **No Defaults**: Fails fast if security secrets are not provided.
-4. **Hashed Passwords**: Enforces bcrypt in production to prevent plaintext leaks.
+4. **Hashed Passwords**: Strongly encourages bcrypt in production to prevent plaintext leaks (warns if missing).
 
 ## Development & Release
 

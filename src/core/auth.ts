@@ -24,9 +24,9 @@ export function resolveConfig(config: AntAuthConfig = {}): AntAuthResolvedConfig
   };
 
   if (process.env.NODE_ENV === 'production' && !resolved.passwordHash) {
-    throw new Error(
-      '[AntAuth] ANT_AUTH_PASSWORD_HASH is required in production. ' +
-      'Plaintext passwords are only allowed in development.'
+    console.warn(
+      '[AntAuth] WARNING: Using plaintext password in production. ' +
+      'It is strongly recommended to use ANT_AUTH_PASSWORD_HASH.'
     );
   }
 

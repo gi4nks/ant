@@ -13,8 +13,9 @@ Ant is a simple, local-first authentication library for Next.js. It focuses on s
 ## Core Principles
 1. **Security First**: Timing-safe comparisons, CSRF protection, secure cookies.
 2. **Local-First**: Optimized for internal tools and small-scale applications.
-3. **Fail-Fast**: Throws errors early if environment variables are invalid or missing.
+3. **Fail-Fast**: Throws errors early if critical environment variables are missing. Warns on non-critical security misconfigurations.
 4. **Developer Experience**: Functional and Class-based APIs for flexibility.
+5. **Edge Compatible**: Zero dependencies on Node.js-specific APIs (like `crypto`), fully compatible with Vercel Edge Runtime.
 
 ## Codebase Map
 - `src/core/`: Pure logic for authentication, tokens, and environment validation.
