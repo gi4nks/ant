@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/gi4nks/ant/compare/v1.1.3...v1.2.0) (2026-01-31)
+
+
+### Features
+
+* add multi-user support via Credentials Provider ([22497b4](https://github.com/gi4nks/ant/commit/22497b49a3ed04b2689d93c8cc57ab99751c6c4a))
+
 ## [1.1.3](https://github.com/gi4nks/ant/compare/v1.1.2...v1.1.3) (2026-01-31)
 
 
