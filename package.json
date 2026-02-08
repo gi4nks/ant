@@ -1,6 +1,6 @@
 {
   "name": "@gi4nks/ant",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "description": "Simple local-first authentication library for Next.js",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -46,8 +46,7 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "jose": "^5.9.6",
-    "zod": "^4.3.6"
+    "jose": "^5.9.6"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
@@ -57,7 +56,6 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.17.9",
     "@types/react": "^19.2.10",
-    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "eslint": "^9.39.2",

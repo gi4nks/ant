@@ -1,195 +1,80 @@
 # Ant
 
-Simple, local-first authentication library for Next.js applications.
+Simple, local-first authentication library for Next.js.
 
 ## Threat Model
 
-Ant is designed for **local-first** applications, internal tools, or small-scale applications where simplicity and speed are prioritized. 
+Ant is designed for **single-user** internal tools or small-scale applications where simplicity is prioritized.
 
 - **Intended Use**: Internal dashboards, local development tools, small private sites.
-- **NOT Intended For**: High-traffic public internet-facing applications, high-value financial systems, or applications requiring complex RBAC.
+- **NOT Intended For**: Multi-user applications, public internet-facing apps, or complex RBAC.
 - **Guarantees**: 
-  - **Edge Runtime Compatible**: Works seamlessly in Next.js Middleware and Edge API Routes.
+  - Edge Runtime Compatible.
   - Timing-safe credential comparison.
-  - Robust CSRF protection for state-changing methods.
+  - CSRF protection for state-changing methods.
   - Secure-by-default cookies (HttpOnly, Secure, SameSite=Strict).
-  - Secure password hashing support (Bcrypt).
-  - Explicit configuration required in production.
+  - Explicit configuration required in production (Hashed passwords mandatory).
 
 ## Configuration
 
-Configure via environment variables or constructor (Required):
+Configure via environment variables:
 
 - `ANT_JWT_SECRET`: Secret for JWT signing (min 32 chars).
 - `ANT_AUTH_USER`: Authorized username.
 - `ANT_AUTH_PASSWORD`: Authorized password (min 8 chars).
-- `ANT_AUTH_PASSWORD_HASH`: Bcrypt hash of the password. **Strongly Recommended in production**. 
-- `ANT_TOKEN_TTL`: Optional. Token expiration time (e.g., `1d`, `7d`). Default: `1d` in production, `7d` in development.
-
-Note: In **production**, it is strongly recommended to use `ANT_AUTH_PASSWORD_HASH`. If only `ANT_AUTH_PASSWORD` is provided, the application will **warn** but continue to function.
-
-Note: The application will throw an error at startup if required environment variables (like Secret or User) are missing.
+- `ANT_AUTH_PASSWORD_HASH`: Bcrypt hash of the password. **Mandatory in production**.
 
 ## Usage
 
-### UI Components
+### Middleware
 
-Ant provides a ready-to-use login form for React/Next.js:
-
-```tsx
-import { auth, LoginForm } from '@gi4nks/ant';
-
-export default function LoginPage({ searchParams }: { searchParams: { callbackUrl?: string } }) {
-  async function handleLogin(formData: FormData) {
-    'use server';
-    try {
-      await auth.login(formData);
-      // Logic to redirect using searchParams.callbackUrl
-    } catch (e: any) {
-      return { error: e.message };
-    }
-  }
-
-  return (
-    <LoginForm 
-      action={handleLogin} 
-      callbackUrl={searchParams.callbackUrl} 
-    />
-  );
-}
-```
-
-### Functional API (Recommended)
-
-```typescript
-import { createAuth } from '@gi4nks/ant';
-
-const { login, logout, getSession, verifyCredentials, middleware } = createAuth({
-  loginPath: '/login',
-});
-
-// Use middleware in middleware.ts
-export { middleware };
-```
-
-### Class-based API (Singleton)
+Protect your routes in `middleware.ts`:
 
 ```typescript
 import { auth } from '@gi4nks/ant';
 
-// In middleware.ts
 export async function middleware(request: Request) {
   return auth.middleware(request);
 }
 
-// In API Routes
-const isValid = auth.verifyCredentials(user, pass);
-if (isValid) await auth.login();
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|login).*)'],
+};
 ```
 
-### Typed Sessions
+### Login (Server Action)
 
 ```typescript
-interface MySession {
-  role: 'admin' | 'user';
-  email: string;
-}
+import { auth } from '@gi4nks/ant';
+import { redirect } from 'next/navigation';
 
-const { getSession } = createAuth<MySession>();
-const session = await getSession(); // Typed as AntSession<MySession>
-```
-
-### Multi-User Support (Credentials Provider)
-
-Ant supports multiple users via a custom `provider` function. This is ideal for external projects that need to verify credentials against a database or an external API.
-
-#### Example: Integration with a Database (e.g., Prisma or Drizzle)
-
-In your external project, you can define the auth configuration like this:
-
-```typescript
-// lib/auth.ts
-import { createAuth } from '@gi4nks/ant';
-import { db } from '@/lib/db'; // Your database client
-
-export const auth = createAuth({
-  secret: process.env.ANT_JWT_SECRET,
-  
-  // Custom provider to fetch users dynamically
-  provider: async (username: string) => {
-    // 1. Fetch user from your database
-    const user = await db.user.findUnique({ 
-      where: { email: username } 
-    });
-    
-    if (!user) return null;
-    
-    // 2. Return the AntUser object. 
-    // Ant will handle the password verification using the hash.
-    return {
-      id: user.id,
-      username: user.email,
-      passwordHash: user.password_hash, // Must be a valid bcrypt hash
-      // Any additional fields will be included in the session token
-      role: user.role,
-      name: user.name,
-    };
+export async function handleLogin(formData: FormData) {
+  'use server';
+  try {
+    await auth.login(formData);
+  } catch (e: any) {
+    return { error: 'Invalid credentials' };
   }
-});
+  redirect('/');
+}
 ```
 
-When using a provider, the `ANT_AUTH_USER` and `ANT_AUTH_PASSWORD` environment variables are no longer required.
+### Session
 
-## Integration Examples
+```typescript
+import { auth } from '@gi4nks/ant';
 
-### Conan (Internal Tool)
-Update `middleware.ts` to use the new functional API for cleaner route protection.
+const session = await auth.getSession();
+if (session) {
+  console.log('Logged in as:', session.user);
+}
+```
 
-### Atlas (Dashboard)
-Migrate from custom JWT logic to Ant to ensure timing-safe comparisons and robust CSRF protection.
-
-## Security Guarantees
+## Security
 
 1. **CSRF Protection**: Automatic for all `POST`, `PUT`, `DELETE`, `PATCH` methods in the middleware.
 2. **Timing-Safe**: All credential checks use constant-time comparison.
-3. **No Defaults**: Fails fast if security secrets are not provided.
-4. **Hashed Passwords**: Strongly encourages bcrypt in production to prevent plaintext leaks (warns if missing).
-
-## Development & Release
-
-This project uses **GitHub Actions** and **semantic-release** for automated versioning and npm publishing.
-
-### Automated Releases
-
-Every push to the `main` branch triggers a workflow that:
-1. Runs linting (`npm run lint`).
-2. Runs tests (`npm test`).
-3. Builds the library (`npm run build`).
-4. Determines the next version based on commit messages.
-5. Publishes the package to **GitHub Packages**.
-6. Creates a GitHub Release and Tag.
-
-### Conventional Commits
-
-To ensure proper versioning, please use [Conventional Commits](https://www.conventionalcommits.org/):
-- `fix: ...` triggers a **patch** release.
-- `feat: ...` triggers a **minor** release.
-- `perf: ...` triggers a **patch** release.
-- `BREAKING CHANGE: ...` in the footer triggers a **major** release.
-
-### Installation from GitHub Packages
-
-Since this package is hosted on GitHub Packages, you need to create or update your `.npmrc` file:
-
-```text
-@gi4nks:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
-```
-
-Then install as usual:
-```bash
-npm install @gi4nks/ant
-```
+3. **No Plaintext in Prod**: Fails fast if `ANT_AUTH_PASSWORD_HASH` is missing in production.
 
 ## License
 

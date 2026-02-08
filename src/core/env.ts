@@ -1,33 +1,33 @@
-import { z } from 'zod';
-
-const envSchema = z.object({
-  ANT_JWT_SECRET: z.string().min(32, {
-    message: 'ANT_JWT_SECRET must be at least 32 characters long for security.',
-  }),
-  ANT_AUTH_USER: z.string().min(1, {
-    message: 'ANT_AUTH_USER is required.',
-  }),
-  ANT_AUTH_PASSWORD: z.string().min(8).optional(),
-  ANT_AUTH_PASSWORD_HASH: z.string().optional(),
-  ANT_TOKEN_TTL: z.string().optional(),
-}).refine((data) => data.ANT_AUTH_PASSWORD || data.ANT_AUTH_PASSWORD_HASH, {
-  message: 'Either ANT_AUTH_PASSWORD or ANT_AUTH_PASSWORD_HASH must be provided.',
-  path: ['ANT_AUTH_PASSWORD'],
-});
-
 export function validateEnv() {
-  const parsed = envSchema.safeParse(process.env);
+  const env = process.env;
+  const errors: string[] = [];
 
-  if (!parsed.success) {
-    const errors = parsed.error.flatten().fieldErrors;
-    const errorMessages = Object.entries(errors)
-      .map(([key, messages]) => `${key}: ${messages?.join(', ')}`)
-      .join('\n');
+  const ANT_JWT_SECRET = env.ANT_JWT_SECRET;
+  const ANT_AUTH_USER = env.ANT_AUTH_USER;
+  const ANT_AUTH_PASSWORD = env.ANT_AUTH_PASSWORD;
+  const ANT_AUTH_PASSWORD_HASH = env.ANT_AUTH_PASSWORD_HASH;
 
-    throw new Error(
-      `[AntAuth] Invalid environment variables:\n${errorMessages}`
-    );
+  if (!ANT_JWT_SECRET || ANT_JWT_SECRET.length < 32) {
+    errors.push('ANT_JWT_SECRET must be at least 32 characters long for security.');
   }
 
-  return parsed.data;
+  if (!ANT_AUTH_USER) {
+    errors.push('ANT_AUTH_USER is required.');
+  }
+
+  if ((!ANT_AUTH_PASSWORD || ANT_AUTH_PASSWORD.length < 8) && !ANT_AUTH_PASSWORD_HASH) {
+    errors.push('Either ANT_AUTH_PASSWORD (min 8 chars) or ANT_AUTH_PASSWORD_HASH must be provided.');
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`[AntAuth] Invalid environment variables:\n${errors.join('\n')}`);
+  }
+
+  return {
+    ANT_JWT_SECRET: ANT_JWT_SECRET!,
+    ANT_AUTH_USER: ANT_AUTH_USER!,
+    ANT_AUTH_PASSWORD: ANT_AUTH_PASSWORD,
+    ANT_AUTH_PASSWORD_HASH,
+    ANT_TOKEN_TTL: env.ANT_TOKEN_TTL,
+  };
 }

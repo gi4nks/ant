@@ -1,12 +1,3 @@
-export interface AntUser {
-  id: string;
-  username: string;
-  passwordHash: string;
-  [key: string]: any;
-}
-
-export type CredentialsProvider = (identifier: string) => Promise<AntUser | null> | AntUser | null;
-
 export interface AntAuthConfig {
   secret?: string;
   user?: string;
@@ -16,17 +7,10 @@ export interface AntAuthConfig {
   loginPath?: string;
   successRedirect?: string;
   tokenTTL?: string;
-  rateLimit?: {
-    maxAttempts?: number;
-    windowMs?: number;
-  };
-  provider?: CredentialsProvider;
 }
 
-export interface AntAuthResolvedConfig extends Required<Omit<AntAuthConfig, 'rateLimit' | 'provider'>> {
+export interface AntAuthResolvedConfig extends Required<AntAuthConfig> {
   secretBytes: Uint8Array;
-  rateLimit: Required<NonNullable<AntAuthConfig['rateLimit']>>;
-  provider?: CredentialsProvider;
 }
 
 export type AntSession<T = { user: string }> = T & {

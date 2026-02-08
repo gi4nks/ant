@@ -9,7 +9,7 @@ describe('resolveConfig', () => {
     vi.restoreAllMocks();
   });
 
-  it('should warn but not throw in production if password hash is missing', () => {
+  it('should throw in production if password hash is missing', () => {
     process.env = {
       ...originalEnv,
       NODE_ENV: 'production',
@@ -18,16 +18,12 @@ describe('resolveConfig', () => {
       ANT_AUTH_PASSWORD: 'password123',
     };
 
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-    expect(() => resolveConfig()).not.toThrow();
-    
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('WARNING: Using plaintext password in production')
+    expect(() => resolveConfig()).toThrow(
+      /SECURITY ERROR: Using plaintext password in production is not allowed/
     );
   });
 
-  it('should not warn in production if password hash is provided', () => {
+  it('should not throw in production if password hash is provided', () => {
     process.env = {
       ...originalEnv,
       NODE_ENV: 'production',
@@ -36,9 +32,6 @@ describe('resolveConfig', () => {
       ANT_AUTH_PASSWORD_HASH: '$2a$10$abcdefg',
     };
 
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
     expect(() => resolveConfig()).not.toThrow();
-    expect(consoleSpy).not.toHaveBeenCalled();
   });
 });

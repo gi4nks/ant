@@ -29,7 +29,7 @@ describe('env validation', () => {
     delete process.env.ANT_AUTH_PASSWORD;
     // @ts-ignore
     delete process.env.ANT_AUTH_PASSWORD_HASH;
-    expect(() => validateEnv()).toThrow(/Either ANT_AUTH_PASSWORD or ANT_AUTH_PASSWORD_HASH/);
+    expect(() => validateEnv()).toThrow(/Either ANT_AUTH_PASSWORD \(min 8 chars\) or ANT_AUTH_PASSWORD_HASH/);
   });
 
   it('should allow hash instead of password', () => {
