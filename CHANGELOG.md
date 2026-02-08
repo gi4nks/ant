@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/gi4nks/ant/compare/v1.2.1...v2.0.0) (2026-02-08)
+
+
+### Features
+
+* simplify to single-user focus and enhance security defaults ([b65341c](https://github.com/gi4nks/ant/commit/b65341cbdb867c48d795626628931c7e800ba90d))
+
+
+### BREAKING CHANGES
+
+* Removed multi-user support (provider API), rate-limiting, and built-in UI components. Environment validation is now internal (removed zod dependency). Plaintext passwords are now strictly forbidden in production.
+
 ## [1.2.1](https://github.com/gi4nks/ant/compare/v1.2.0...v1.2.1) (2026-01-31)
 
 
